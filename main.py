@@ -2,21 +2,20 @@
 # Proyecto VINKS - Startup Chile CORFO
 # ESTE CODIGO ES EXPERIMENTAL
 # Autor: DRCSR
-# Version: 2.2 Minimal Dashboard
+# Version: 3.0 Multi-Page Dashboard
 
 import streamlit as st
-import subprocess
 import sys
 from pathlib import Path
 
-# Configuración de la página
+# Configuración de la página principal
 st.set_page_config(
     page_title="VINKS Analytics Suite",
     page_icon="🔬",
     layout="wide"
 )
 
-# CSS simple con color morado vibrante
+# CSS con color morado vibrante y navegación
 st.markdown("""
 <style>
     .header-box {
@@ -29,51 +28,49 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(152, 16, 250, 0.3);
     }
     
-    .app-box {
+    .nav-container {
         background: #f8f9fa;
-        padding: 2rem;
-        border-radius: 12px;
-        border: 1px solid #dee2e6;
-        margin-bottom: 1.5rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        border-radius: 10px;
+        border: 2px solid #9810fa;
+        margin-bottom: 2rem;
     }
     
-    .app-box:hover {
-        transform: translateY(-3px);
+    .app-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+    }
+    
+    .app-card:hover {
+        transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(152, 16, 250, 0.1);
         border-color: #9810fa;
     }
     
     .app-title {
         color: #9810fa;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
     
     .app-desc {
         color: #4a5568;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-        font-size: 1rem;
-    }
-    
-    .status-online {
-        color: #9810fa;
-        font-weight: bold;
-    }
-    
-    .status-offline {
-        color: #dc3545;
-        font-weight: bold;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
     }
     
     /* Modo oscuro */
     @media (prefers-color-scheme: dark) {
-        .app-box {
+        .nav-container, .app-card {
             background: #2d3748 !important;
-            border: 1px solid #4a5568 !important;
+            border-color: #9810fa !important;
             color: #e2e8f0 !important;
         }
         
@@ -104,11 +101,6 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(152, 16, 250, 0.4);
         background: linear-gradient(135deg, #8a0ee6 0%, #7c0dd1 100%);
     }
-    
-    .stButton > button:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -118,97 +110,137 @@ def get_current_directory():
 def check_file_exists(app_file):
     return (get_current_directory() / app_file).exists()
 
-def run_app(app_file):
-    try:
-        app_path = get_current_directory() / app_file
-        if not app_path.exists():
-            st.error(f"No se encontró: {app_file}")
-            return
-        
-        cmd = [sys.executable, "-m", "streamlit", "run", str(app_path)]
-        subprocess.Popen(cmd, cwd=str(get_current_directory()))
-        st.success(f"✅ {app_file} iniciado correctamente")
-        st.info("La aplicación se abrirá en una nueva pestaña")
-        
-    except Exception as e:
-        st.error(f"Error: {e}")
+# Inicializar estado de sesión para navegación
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = 'home'
 
-# Aplicaciones disponibles
-apps = {
-    "app_analizador_final.py": {
-        "name": "📈 Analizador de Publicaciones",
-        "desc": "Análisis de sentimiento en redes sociales"
-    },
-    "app_cultura_final.py": {
-        "name": "🏢 Análisis de Cultura Organizacional", 
-        "desc": "Evaluación de clima laboral"
-    },
-    "app_recomendador_final.py": {
-        "name": "✍️ Recomendador de Contenido",
-        "desc": "Sugerencias para contenido digital"
-    },
-    "app_tendencia_final.py": {
-        "name": "🌐 Análisis de Organigrama",
-        "desc": "Visualización de estructura organizacional"
-    }
-}
+def navigate_to(page):
+    """Función para navegar entre páginas"""
+    st.session_state.current_page = page
+    st.rerun()
 
-# Header principal
-st.markdown("""
-<div class="header-box">
-    <h1>🔬 VINKS Analytics Suite</h1>
-    <p>Seleccione la aplicación que desea ejecutar</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Lista de aplicaciones
-st.header("🚀 Aplicaciones")
-
-for app_file, info in apps.items():
-    file_exists = check_file_exists(app_file)
-    status = "✅ Disponible" if file_exists else "❌ No encontrado"
-    status_class = "status-online" if file_exists else "status-offline"
-    
-    st.markdown(f"""
-    <div class="app-box">
-        <div class="app-title">{info['name']}</div>
-        <div class="app-desc">{info['desc']}</div>
-        <p class="{status_class}">Estado: {status}</p>
+def show_home_page():
+    """Muestra la página principal del dashboard"""
+    # Header principal
+    st.markdown("""
+    <div class="header-box">
+        <h1>🔬 VINKS Analytics Suite</h1>
+        <p>Plataforma Integrada de Análisis Empresarial</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Botón integrado en la card
-    col1, col2, col3 = st.columns([2, 1, 2])
+    # Navegación
+    st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+    st.markdown("### 🚀 Seleccione una aplicación:")
+    
+    # Aplicaciones en cards clickeables
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("📈 Analizador de Publicaciones", key="nav_analizador", use_container_width=True):
+            navigate_to('analizador')
+        st.markdown("*Análisis de sentimiento en redes sociales*")
+        
+        if st.button("🏢 Cultura Organizacional", key="nav_cultura", use_container_width=True):
+            navigate_to('cultura')
+        st.markdown("*Evaluación de clima laboral*")
+    
     with col2:
-        if file_exists:
-            if st.button(f"▶️ Ejecutar", key=app_file, use_container_width=True):
-                run_app(app_file)
-        else:
-            st.button("❌ No disponible", disabled=True, key=f"disabled_{app_file}", use_container_width=True)
+        if st.button("✍️ Recomendador de Contenido", key="nav_recomendador", use_container_width=True):
+            navigate_to('recomendador')
+        st.markdown("*Sugerencias para contenido digital*")
+        
+        if st.button("🌐 Análisis de Organigrama", key="nav_tendencia", use_container_width=True):
+            navigate_to('tendencia')
+        st.markdown("*Visualización de estructura organizacional*")
     
-    if app_file != list(apps.keys())[-1]:
-        st.markdown("---")
-
-# Información adicional
-st.markdown("---")
-with st.expander("ℹ️ Información y Uso"):
-    st.markdown("""
-    ### 🚀 Cómo usar:
-    1. Haga clic en "▶️ Ejecutar" dentro de cada aplicación
-    2. La aplicación se abrirá en una nueva pestaña del navegador
-    3. Puede ejecutar múltiples aplicaciones al mismo tiempo
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    ### 📁 Archivos requeridos por aplicación:
-    - **📈 Analizador de Publicaciones:** posts.xlsx + comments.xlsx
-    - **🏢 Cultura Organizacional:** encuesta_clima.xlsx  
-    - **✍️ Recomendador de Contenido:** Solo texto (no requiere archivos)
-    - **🌐 Análisis de Organigrama:** estructura_org.xlsx
-    """)
+    # Información adicional
+    st.markdown("---")
+    with st.expander("ℹ️ Información y Uso"):
+        st.markdown("""
+        ### 🚀 Cómo usar:
+        1. Haga clic en cualquier botón de aplicación arriba
+        2. Cada aplicación mantiene su propia vista y configuración
+        3. Use el botón "🏠 Volver al Inicio" en cada aplicación para regresar
+        
+        ### 📁 Archivos requeridos por aplicación:
+        - **📈 Analizador de Publicaciones:** posts.xlsx + comments.xlsx
+        - **🏢 Cultura Organizacional:** encuesta_clima.xlsx  
+        - **✍️ Recomendador de Contenido:** Solo texto (no requiere archivos)
+        - **🌐 Análisis de Organigrama:** estructura_org.xlsx
+        """)
 
-# Footer minimalista
+def load_app_with_navigation(app_file):
+    """Carga una aplicación con botón de navegación"""
+    # Botón para volver al inicio
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🏠 Volver al Dashboard Principal", key="back_home", use_container_width=True):
+            navigate_to('home')
+    
+    st.markdown("---")
+    
+    # Cargar el contenido de la aplicación
+    try:
+        app_path = get_current_directory() / app_file
+        if not app_path.exists():
+            st.error(f"❌ No se encontró: {app_file}")
+            return
+        
+        # Leer el archivo
+        with open(app_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+        
+        # Método más simple: reemplazar st.set_page_config por un comentario
+        # Esto preserva la indentación original
+        lines = code.split('\n')
+        filtered_lines = []
+        
+        for line in lines:
+            if 'st.set_page_config(' in line:
+                # Comentar la línea en lugar de eliminarla
+                filtered_lines.append('# ' + line)
+            elif line.strip().startswith('page_title=') or line.strip().startswith('page_icon=') or line.strip().startswith('layout='):
+                # Comentar líneas de configuración de página
+                filtered_lines.append('# ' + line)
+            else:
+                filtered_lines.append(line)
+        
+        filtered_code = '\n'.join(filtered_lines)
+        
+        # Ejecutar el código filtrado
+        exec(filtered_code, globals())
+        
+    except Exception as e:
+        st.error(f"❌ Error al cargar {app_file}:")
+        st.exception(e)
+        
+        # Mostrar información de depuración
+        st.markdown("### 🔧 Información de Debug:")
+        st.code(f"Error en línea: {e}")
+        
+        # Opción para mostrar el código filtrado para debugging
+        with st.expander("Ver código filtrado (para debugging)"):
+            st.code(filtered_code[:1000] + "..." if len(filtered_code) > 1000 else filtered_code)
+
+# Lógica principal de navegación
+if st.session_state.current_page == 'home':
+    show_home_page()
+elif st.session_state.current_page == 'analizador':
+    load_app_with_navigation('app_analizador_final.py')
+elif st.session_state.current_page == 'cultura':
+    load_app_with_navigation('app_cultura_final.py')
+elif st.session_state.current_page == 'recomendador':
+    load_app_with_navigation('app_recomendador_final.py')
+elif st.session_state.current_page == 'tendencia':
+    load_app_with_navigation('app_tendencia_final.py')
+
+# Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; padding: 1rem; color: #9810fa;'>
-    <strong>VINKS Dashboard</strong> 
+    <strong>VINKS Dashboard v3.0</strong> | Sistema Multi-Página
 </div>
 """, unsafe_allow_html=True)
