@@ -241,6 +241,6 @@ elif st.session_state.current_page == 'tendencia':
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; padding: 1rem; color: #9810fa;'>
-    <strong>VINKS Dashboard v3.0</strong> | Sistema Multi-Página
+    <strong>© 2024 VINKS. All rights reserved.</strong>
 </div>
 """, unsafe_allow_html=True)
